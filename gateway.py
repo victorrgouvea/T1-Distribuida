@@ -5,7 +5,7 @@ import requests
 app = Flask(__name__)
 cache = {}
 
-@app.post('/realizer-pedido')
+@app.post('/realizar-pedido')
 def create_order():
   data = request.get_json();
   order = {}
@@ -22,7 +22,8 @@ def get_menu(id):
 @app.get('/<int:id>/get-status-pedido')
 def get_status_pedido(id):
   if id in cache:
-    return make_response(jsonify({'status':cache[id]['status']}), 200)
+    resp = make_response(jsonify({'status':cache[id]['status']}), 200)
+    return resp
   else:
    return make_response('Order not found', 404)
 
@@ -38,7 +39,7 @@ def remove_food():
 def update_order_status():
   data = request.get_json()
   if data['id'] in cache:
-    cache['id'] = data['status']
+    cache[data['id']]['status'] = data['status']
     return make_response("Success", 202)
   else:
     return make_response('Order not found', 404)
