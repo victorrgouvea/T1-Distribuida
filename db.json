@@ -1,15 +1,15 @@
 {
     "restaurantes": {
-        "restA": {
-            "id": 1,
+        "1": {
+            "nome": "restA",
             "comidas": ["Pastel", "Brigadeiro", "Sorvete"]
         },
-        "restB":{
-            "id": 2,
+        "2":{
+            "nome": "restB",
             "comidas": ["Macarrão", "Pizza"]
         }
     },
-    "Pedidos": {
+    "pedidos": {
 
     }
 }

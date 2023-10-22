@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, make_response, jsonify
 import json
 
 
@@ -6,39 +6,50 @@ app = Flask(__name__)
 
 db_path = 'db.json'
 
-def write_json(path, json_data):
-    with open(path, 'r+') as file_out:
+@app.delete('/remove-food')
+def get_order_by_id():
+  data = request.get_json()
+  with open(db_path, 'r+') as file_out:
         j = json.load(file_out)
-        for k, v in json_data.items():
-            j[k] = v
+        j['restaurantes'][data.id]['comidas'].remove(data.comida)
         file_out.seek(0)
         json.dump(j, file_out, indent=4)
+  return make_response('Sucess', 200)
 
-def read_json(path):
-    with open(path) as file_in:
-        return json.load(file_in)
+@app.post('/add_food')
+def add_food():
+  data = request.get_json()
+  with open(db_path, 'r+') as file_out:
+        j = json.load(file_out)
+        j['restaurantes'][data.id]['comidas'].append(data.comida)
+        file_out.seek(0)
+        json.dump(j, file_out, indent=4)
+  return make_response('Sucess', 200)
 
-@app.get('/get_orders/<int:id>')
-def list_order_by_id(id):
-  orders = read_json(db_path)
-  for [k, v] in orders.items():
-    if k == id:
-       return v
+@app.post('/save-order')
+def save_order():
+  data = request.get_json()
+  with open(db_path, 'r+') as file_out:
+        j = json.load(file_out)
+        for [k, v] in data.items():
+            if k == 'id':
+                continue
+            j['pedidos'][data.id][k] = v
+        file_out.seek(0)
+        json.dump(j, file_out, indent=4)
+  return make_response('Sucess', 200)
 
-@app.get('/get_orders')
+@app.get('/get-menu')
 def get_order_by_id():
-  orders = read_json(db_path)
-  return orders
-
-@app.post('/save_order/<int:id>')
-def write_order():
-  order = request.get_json()
-  write_json(db_path, order)
+  data = None
+  with open(db_path) as file_out:
+        j = json.load(file_out)
+        data = j['restaurantes']
+  return make_response(jsonify(data), 200)
 
 
-#write_json(db_path, in_memory_datastore)
-#response = read_json(db_path)
-#print(response)
+
+
 if __name__ == '__main__':
   pass
-  #app.run(port=5001, host='localhost', debug=True)
+  app.run(port=5001, host='localhost', debug=True)

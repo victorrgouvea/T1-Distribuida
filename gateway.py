@@ -14,10 +14,9 @@ def create_order():
   cache[order['id']] = order
   return make_response("Success", 201)
 
-@app.get('/<id>/get-cardapio')
+@app.get('/<id>/get-menu')
 def get_menu(id):
   return requests.get(url=f"http://localhost:5001/get-menu/{id}")
-  # make_response(jsonify(menu), 200)
 
 @app.get('/<int:id>/get-status-pedido')
 def get_status_pedido(id):
@@ -40,6 +39,9 @@ def update_order_status():
   data = request.get_json()
   if data['id'] in cache:
     cache[data['id']]['status'] = data['status']
+    if data['status'] == 'entregue':
+      requests.post(url=f"http://localhost:5001/save-order/", data=cache[data['id']])
+      del cache[data['id']]
     return make_response("Success", 202)
   else:
     return make_response('Order not found', 404)
