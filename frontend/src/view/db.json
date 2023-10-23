@@ -20,18 +20,20 @@
         "1": {
             "comida": "pastel",
             "restaurante": {
-                "id": 1,
+                "id": "1",
                 "nome": "Pastelaria do Felipe"
             },
-            "status": "entregue"
+            "status": "entregue",
+            "cliente": "Mariana"
         },
         "2": {
             "comida": "pastel",
             "restaurante": {
-                "id": 2,
+                "id": "2",
                 "nome": "Pastelaria do Victor"
             },
-            "status": "entregue"
+            "status": "entregue",
+            "cliente": "Mariana"
         }
     }
 }

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Col, Container, Form, ListGroup, Row, Table } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
-import { css } from '@emotion/css';
+import { Button, Col, Container, Form, ListGroup, Row, Table } from 'react-bootstrap';
 import { Checkbox, HFlow } from 'bold-ui';
+import jsonData from './db.json';
 import RestauranteSelect from '../components/RestauranteSelect';
-import jsonData from './db.json'
-import { Pedido } from './RestauranteView';
+import { Pedido } from '../types';
+import { css } from '@emotion/css';
 
 interface PedidoFormModel {
   endereco: string;
@@ -22,7 +22,7 @@ export default function ClienteView() {
     telefone: '',
     selectedItems: [],
     restaurante: '',
-  });
+  });  
 
   const [error, setError] = useState('');
 
@@ -55,7 +55,7 @@ export default function ClienteView() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-  };
+  };  
 
   const handleSubmit = () => {
     const requestData = {
@@ -69,7 +69,7 @@ export default function ClienteView() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ 'id': '2', 'comida': 'pastel', 'restaurante': 'teste'}),
+      body: JSON.stringify({ 'id': '4', 'comida': 'pastel', 'restaurante': 'teste', 'status': 'Preparando'}),
     })
       .then((response) => {
         if (response.ok) {

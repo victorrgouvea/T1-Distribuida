@@ -5,17 +5,11 @@ import { css } from '@emotion/css';
 import { HFlow } from 'bold-ui';
 import OrderStatusSelect from '../components/OrderStatusSelect';
 import jsonData from './db.json';
-
-export interface Pedido {
-  comida: string;
-  restaurante: { id: number; nome: string };
-  status: string;
-  cliente: string;
-}
+import { Pedido } from '../types';
 
 export default function RestauranteView() {
   const { nomeRestaurante } = useParams<{ nomeRestaurante: string }>();
-  const restauranteId = 1;
+  const restauranteId = "1";
   const [data, setData] = useState({ comidas: [] });
   const [novoItem, setNovoItem] = useState('');
   const [status, setStatus] = useState('');
@@ -49,10 +43,10 @@ export default function RestauranteView() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ 'id': id, 'status': newStatus }),
+      body: JSON.stringify({ 'id': '4', 'status': 'Saiu para entrega' }),
     })
       .then((res) => {
-        if (res.status === 200) {
+        if (res.status === 202) {
           fetchMenuData();
         } else {
           alert('Um erro ocorreu ao atualizar o status do pedido.');
