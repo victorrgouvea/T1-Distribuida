@@ -1,13 +1,19 @@
 from flask import Flask, request, make_response, jsonify
 import json
 import requests
+import time
 
 app = Flask(__name__)
 cache = {}
+last_call = 0
 
 @app.post('/realizar-pedido')
 def create_order():
-  data = request.get_json();
+  global last_call
+  if time.time() <= last_call + 10:
+    return make_response("Too many requests", 500)
+  last_call = time.time()
+  data = request.get_json()
   order = {}
   for [k, v] in data.items():
     order[k] = v
@@ -16,7 +22,15 @@ def create_order():
 
 @app.get('/<id>/get-menu')
 def get_menu(id):
-  return requests.get(url=f"http://localhost:5001/get-menu/{id}")
+  
+  response = requests.get(url=f"http://localhost:5001/get-menu/{id}")
+
+  if response.status_code == 200:
+    return jsonify(response.json())
+  
+  else:
+    return jsonify({'Error': 'Erro na solicitação à API externa'}), 500
+
 
 @app.get('/<int:id>/get-status-pedido')
 def get_status_pedido(id):
@@ -26,13 +40,27 @@ def get_status_pedido(id):
   else:
    return make_response('Order not found', 404)
 
-@app.post('/cadastrar-comida')
+@app.put('/cadastrar-comida')
 def add_food():
-  return requests.post(url=f"http://localhost:5001/add-food/", data=request.get_json())
+  
+  response = requests.put(url="http://localhost:5001/add-food", json=request.get_json())
+  
+  if response.status_code == 200:
+    return make_response("Success", 200)
+  else:
+    return jsonify({'Error': 'Erro na solicitação à API externa'}), 500
 
 @app.delete('/remover-comida')
 def remove_food():
-  return requests.post(url=f"http://localhost:5001/remove-food/", data=request.get_json())
+  
+  response = requests.delete(url=f"http://localhost:5001/remove-food", json=request.get_json())
+
+  if response.status_code == 200:
+    return make_response("Success", 200)
+  elif response.status_code == 400:
+    return make_response("Bad request: Food not found", 400)
+  else:
+    return jsonify({'Error': 'Erro na solicitação à API externa'}), 500
 
 @app.put('/atualizar-status-pedido')
 def update_order_status():
@@ -40,7 +68,7 @@ def update_order_status():
   if data['id'] in cache:
     cache[data['id']]['status'] = data['status']
     if data['status'] == 'entregue':
-      requests.post(url=f"http://localhost:5001/save-order/", data=cache[data['id']])
+      requests.post(url=f"http://localhost:5001/save-order", json=cache[data['id']])
       del cache[data['id']]
     return make_response("Success", 202)
   else:

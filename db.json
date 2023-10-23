@@ -2,14 +2,25 @@
     "restaurantes": {
         "1": {
             "nome": "restA",
-            "comidas": ["Pastel", "Brigadeiro", "Sorvete"]
+            "comidas": [
+                "Pastel",
+                "Brigadeiro"
+            ]
         },
-        "2":{
+        "2": {
             "nome": "restB",
-            "comidas": ["Macarrão", "Pizza"]
+            "comidas": [
+                "Macarrao",
+                "Pizza",
+                "Lasanha"
+            ]
         }
     },
     "pedidos": {
-
+        "1": {
+            "comida": "pastel",
+            "restaurante": "Pastelaria do Felipe",
+            "status": "entregue"
+        }
     }
 }
