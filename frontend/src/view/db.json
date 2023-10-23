@@ -1,0 +1,37 @@
+{
+    "restaurantes": {
+        "1": {
+            "nome": "fiz esse db separado p/ não estragar o funcionamento da API enquanto faço minhas mudanças",
+            "comidas": [
+                "Pastel",
+                "Brigadeiro"
+            ]
+        },
+        "2": {
+            "nome": "restB",
+            "comidas": [
+                "Macarrão",
+                "Pizza",
+                "Lasanha"
+            ]
+        }
+    },
+    "pedidos": {
+        "1": {
+            "comida": "pastel",
+            "restaurante": {
+                "id": 1,
+                "nome": "Pastelaria do Felipe"
+            },
+            "status": "entregue"
+        },
+        "2": {
+            "comida": "pastel",
+            "restaurante": {
+                "id": 2,
+                "nome": "Pastelaria do Victor"
+            },
+            "status": "entregue"
+        }
+    }
+}

@@ -2,38 +2,42 @@ import { useState } from 'react';
 import { Container, Row, Col, Button, Form } from 'react-bootstrap';
 import { css } from '@emotion/css';
 import { useNavigate } from 'react-router-dom';
+import { HFlow } from 'bold-ui';
 
 export default function MainView() {
   const navigate = useNavigate();
   const [nome, setNome] = useState('');
 
-  const handleClickSouRestaurante = () => {
+  const handleLogin = (role: string) => {
     if (nome.trim() !== '') {
-      navigate(`/restaurante-view/${nome}`);
+      navigate(`/${role}/${nome}`);
     } else {
-      alert('Insira o nome do restaurante para acessar o sistema.');
+      setError('Insira o nome para acessar o sistema.');
     }
   };
 
-  const handleClickSouCliente = () => {
-    if (nome.trim() !== '') {
-      navigate(`/cliente-view/${nome}`);
-    } else {
-      alert('Insira o seu nome para acessar o sistema.');
-    }
-  };
+  const [error, setError] = useState('');
 
   return (
-    <Container fluid>
+    <Container className={styles.container}>
       <Row>
         <Col>
-          <h3>Aplicativo de Gestão de Pedidos</h3>
+          <h2 className={styles.heading}>Aplicativo de Gestão de Pedidos</h2>
         </Col>
       </Row>
-      <Row>
-        <Col lg={4}>
+
+      {error && (
+        <Row>
+          <Col lg={6}>
+            <div className={styles.error}>{error}</div>
+          </Col>
+        </Row>
+      )}
+
+      <Row className={styles.rowSpacing}>
+        <Col lg={6}>
           <Form>
-            <Form.Group controlId="nome">
+            <Form.Group>
               <Form.Label>Nome</Form.Label>
               <Form.Control
                 value={nome}
@@ -43,17 +47,28 @@ export default function MainView() {
           </Form>
         </Col>
       </Row>
-      <Row className={styles.buttonRow}>
-        <Col lg={2}>
-          <Button variant="primary" className={styles.button} onClick={handleClickSouRestaurante}>
-            Quero logar como restaurante
-          </Button>
-        </Col>
-        <Col lg={2}>
-          <Button variant="primary" className={styles.button} onClick={handleClickSouCliente}>
-            Quero logar como cliente
-          </Button>
-        </Col>
+
+      <Row className={styles.rowSpacing}>
+        <HFlow hSpacing={1}>
+          <Col lg={3}>
+            <Button
+              variant="primary"
+              className={styles.button}
+              onClick={() => handleLogin('restaurante')}
+            >
+              Quero logar como restaurante
+            </Button>
+          </Col>
+          <Col lg={3}>
+            <Button
+              variant="primary"
+              className={styles.button}
+              onClick={() => handleLogin('cliente')}
+            >
+              Quero logar como cliente
+            </Button>
+          </Col>
+        </HFlow>
       </Row>
     </Container>
   );
@@ -61,9 +76,19 @@ export default function MainView() {
 
 const styles = {
   button: css`
-    width: 16rem;
+    width: 19.4rem;
+    height: 2.5rem;
   `,
-  buttonRow: css`
+  container: css`
+    padding-top: 3rem;
+  `,
+  heading: css`
+    font-weight: bold;
+  `,
+  rowSpacing: css`
     padding-top: 1rem;
+  `,
+  error: css`
+    color: red;
   `,
 };
