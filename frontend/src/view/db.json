@@ -17,23 +17,22 @@
         }
     },
     "pedidos": {
-        "1": {
-            "comida": "pastel",
-            "restaurante": {
-                "id": "1",
-                "nome": "Pastelaria do Felipe"
+        "12": {
+            "id": "12",
+            "cliente": {
+                "nome": "Mariana",
+                "endereco": "tete",
+                "telefone": "teete"
             },
-            "status": "entregue",
-            "cliente": "Mariana"
-        },
-        "2": {
-            "comida": "pastel",
             "restaurante": {
                 "id": "2",
-                "nome": "Pastelaria do Victor"
+                "nome": "restB"
             },
-            "status": "entregue",
-            "cliente": "Mariana"
+            "itensSelecionados": [
+                "Macarrão",
+                "Pizza"
+            ],
+            "status": "Preparando"
         }
     }
 }

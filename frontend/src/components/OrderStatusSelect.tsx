@@ -14,9 +14,9 @@ function OrderStatusSelect({ status, setStatus }: OrderStatusSelectProps) {
 
   return (
     <Form.Select value={status} onChange={handleStatusChange}>
-      <option value="1">Preparando</option>
-      <option value="2">Saiu para entrega</option>
-      <option value="3">Finalizado</option>
+      <option value="Preparando">Preparando</option>
+      <option value="Saiu para entrega">Saiu para entrega</option>
+      <option value="Finalizado">Finalizado</option>
     </Form.Select>
   );
 }

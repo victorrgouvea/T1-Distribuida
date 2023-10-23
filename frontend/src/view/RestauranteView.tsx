@@ -1,18 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Button, Col, Container, Form, ListGroup, Row, Table } from 'react-bootstrap';
+import { Button, Col, Container, Form, ListGroup, Row } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 import { css } from '@emotion/css';
 import { HFlow } from 'bold-ui';
-import OrderStatusSelect from '../components/OrderStatusSelect';
-import jsonData from './db.json';
-import { Pedido } from '../types';
+import PedidoTable from './PedidoTable';
 
 export default function RestauranteView() {
   const { nomeRestaurante } = useParams<{ nomeRestaurante: string }>();
   const restauranteId = "1";
   const [data, setData] = useState({ comidas: [] });
   const [novoItem, setNovoItem] = useState('');
-  const [status, setStatus] = useState('');
   const [error, setError] = useState('');
 
   const fetchMenuData = () => {
@@ -34,28 +31,6 @@ export default function RestauranteView() {
   useEffect(() => {
     fetchMenuData();
   }, []);
-
-  const handleClickUpdateStatusPedido = (id: string, newStatus: string) => {
-    console.log(newStatus)
-    console.log(id)
-    fetch("http://localhost:5000/atualizar-status-pedido", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ 'id': '4', 'status': 'Saiu para entrega' }),
-    })
-      .then((res) => {
-        if (res.status === 202) {
-          fetchMenuData();
-        } else {
-          alert('Um erro ocorreu ao atualizar o status do pedido.');
-        }
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-      });
-  };
 
   const handleClickDeletarItem = (item: string) => {
     fetch("http://localhost:5000/remover-comida", {
@@ -98,10 +73,6 @@ export default function RestauranteView() {
         console.error('Error:', error);
       });
   };
-  
-
-  // TODO: Pegar a lista de pedidos pelo backend
-  const pedidosData: Record<string, Pedido> = jsonData.pedidos;
 
   return (
     <Container className={styles.container}>
@@ -156,38 +127,7 @@ export default function RestauranteView() {
       <Row className={styles.rowSpacing}>
         <Col>
           <h4>Pedidos</h4>
-        </Col>
-      </Row>
-      <Row>
-        <Col>
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>Pedido</th>
-                <th>Cliente</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.keys(pedidosData)
-                .filter((pedidoId) => pedidosData[pedidoId].restaurante.id === restauranteId)
-                .map((pedidoId) => {
-                  const pedido = pedidosData[pedidoId];
-                  return (
-                    <tr key={pedidoId}>
-                      <td>{pedido.comida}</td>
-                      <td>{pedido.restaurante.nome}</td>
-                      <td>
-                        <OrderStatusSelect status={pedido.status} setStatus={(newStatus) => {
-                          setStatus(newStatus);
-                          handleClickUpdateStatusPedido(pedidoId, newStatus);
-                        }} />
-                      </td>
-                    </tr>
-                  );
-                })}
-            </tbody>
-          </Table>
+          <PedidoTable nome={nomeRestaurante} origin='restaurante'></PedidoTable>
         </Col>
       </Row>
     </Container>
