@@ -20,7 +20,7 @@
         "1": {
             "comida": "pastel",
             "restaurante": "Pastelaria do Felipe",
-            "status": "entregue"
+            "status": "Finalizado"
         }
     }
 }

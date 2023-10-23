@@ -5,7 +5,7 @@ import time
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=["http://localhost:3000"])
 cache = {}
 last_call = 0
 
@@ -67,9 +67,9 @@ def remove_food():
 @app.put('/atualizar-status-pedido')
 def update_order_status():
   data = request.get_json()
-  if data['id'] in cache:
+  if data['id'] in cache.keys():
     cache[data['id']]['status'] = data['status']
-    if data['status'] == 'entregue':
+    if data['status'] == 'Finalizado':
       requests.post(url=f"http://localhost:5001/save-order", json=cache[data['id']])
       del cache[data['id']]
     return make_response("Success", 202)
