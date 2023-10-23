@@ -6,6 +6,7 @@ import reportWebVitals from './reportWebVitals';
 import { createBrowserRouter, RouterProvider} from "react-router-dom";
 import RestauranteView from './view/RestauranteView';
 import ClienteView from './view/ClienteView';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const router = createBrowserRouter([
   {
@@ -13,11 +14,11 @@ const router = createBrowserRouter([
     element: <App />,
   },
   {
-    path: "/restaurante-view/",
+    path: "/restaurante-view/:nomeRestaurante/",
     element: <RestauranteView />,
   },
   {
-    path: "/cliente-view/",
+    path: "/cliente-view/:nomeCliente/",
     element: <ClienteView />,
   },
 ]);
