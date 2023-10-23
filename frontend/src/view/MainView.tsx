@@ -1,48 +1,69 @@
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
+import { useState } from 'react';
+import { Container, Row, Col, Button, Form } from 'react-bootstrap';
 import { css } from '@emotion/css';
-import { Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
 export default function MainView() {
   const navigate = useNavigate();
+  const [nome, setNome] = useState('');
 
   const handleClickSouRestaurante = () => {
-    navigate('/restaurante-view/');
+    if (nome.trim() !== '') {
+      navigate(`/restaurante-view/${nome}`);
+    } else {
+      alert('Insira o nome do restaurante para acessar o sistema.');
+    }
   };
 
   const handleClickSouCliente = () => {
-    navigate('/cliente-view/');
+    if (nome.trim() !== '') {
+      navigate(`/cliente-view/${nome}`);
+    } else {
+      alert('Insira o seu nome para acessar o sistema.');
+    }
   };
 
   return (
-    <Container className={styles.container}>
+    <Container fluid>
       <Row>
-        <Col className={styles.centeredText}>
+        <Col>
           <h3>Aplicativo de Gestão de Pedidos</h3>
         </Col>
       </Row>
       <Row>
-        <Button variant="danger" onClick={handleClickSouRestaurante}>
-          Sou restaurante
-        </Button>{' '}
-        <Button variant="danger" onClick={handleClickSouCliente}>
-          Sou cliente
-        </Button>
+        <Col lg={4}>
+          <Form>
+            <Form.Group controlId="nome">
+              <Form.Label>Nome</Form.Label>
+              <Form.Control
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+              />
+            </Form.Group>
+          </Form>
+        </Col>
+      </Row>
+      <Row className={styles.buttonRow}>
+        <Col lg={2}>
+          <Button variant="primary" className={styles.button} onClick={handleClickSouRestaurante}>
+            Quero logar como restaurante
+          </Button>
+        </Col>
+        <Col lg={2}>
+          <Button variant="primary" className={styles.button} onClick={handleClickSouCliente}>
+            Quero logar como cliente
+          </Button>
+        </Col>
       </Row>
     </Container>
   );
 }
 
 const styles = {
-  container: css`
-    text-align: center;
+  button: css`
+    width: 16rem;
   `,
-  centeredText: css`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    // height: 100vh;
+  buttonRow: css`
+    padding-top: 1rem;
   `,
 };
