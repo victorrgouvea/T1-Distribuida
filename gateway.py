@@ -2,8 +2,10 @@ from flask import Flask, request, make_response, jsonify
 import json
 import requests
 import time
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 cache = {}
 last_call = 0
 
@@ -75,5 +77,4 @@ def update_order_status():
     return make_response('Order not found', 404)
 
 if __name__ == '__main__':
-  pass
   app.run(port=5000, host='localhost', debug=True)

@@ -64,5 +64,4 @@ def get_menu(id):
 
 
 if __name__ == '__main__':
-  pass
   app.run(port=5001, host='localhost', debug=True)
