@@ -6,10 +6,11 @@ import { HFlow } from 'bold-ui';
 import OrderStatusSelect from '../components/OrderStatusSelect';
 import jsonData from './db.json';
 
-interface Pedido {
+export interface Pedido {
   comida: string;
   restaurante: { id: number; nome: string };
   status: string;
+  cliente: string;
 }
 
 export default function RestauranteView() {
@@ -17,6 +18,7 @@ export default function RestauranteView() {
   const restauranteId = 1;
   const [data, setData] = useState({ comidas: [] });
   const [novoItem, setNovoItem] = useState('');
+  const [status, setStatus] = useState('');
   const [error, setError] = useState('');
 
   const fetchMenuData = () => {
@@ -39,26 +41,70 @@ export default function RestauranteView() {
     fetchMenuData();
   }, []);
 
-  const handleClickUpdateStatusPedido = () => {
-    // TODO: Implementar através do OrderStatusSelect
+  const handleClickUpdateStatusPedido = (id: string, newStatus: string) => {
+    console.log(newStatus)
+    console.log(id)
+    fetch("http://localhost:5000/atualizar-status-pedido", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ 'id': id, 'status': newStatus }),
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          fetchMenuData();
+        } else {
+          alert('Um erro ocorreu ao atualizar o status do pedido.');
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
   };
 
-  const handleClickDeletarItem = (index: number) => {
-    // TODO: Implementar deleção de item do menu
-    console.log(index);
+  const handleClickDeletarItem = (item: string) => {
+    fetch("http://localhost:5000/remover-comida", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ 'id':'1', 'comida': item}),
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          fetchMenuData();
+        } else if (res.status === 400) {
+          alert('Item não encontrado.');
+        } else {
+          alert('Um erro ocorreu ao deletar este item.');
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
   };
 
   const handleClickAdicionarItem = () => {
-    if (!novoItem) {
-      setError('O campo novo item não pode estar vazio.');
-      return;
-    }
-
-    // TODO: Implementar adição de item do menu
-    console.log(novoItem);
-    setNovoItem('');
-    setError('');
+    fetch("http://localhost:5000/cadastrar-comida", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ 'id':'1', 'comida': novoItem}),
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          fetchMenuData();
+        } else {
+          alert('Um erro ocorreu ao deletar este item.');
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
   };
+  
 
   // TODO: Pegar a lista de pedidos pelo backend
   const pedidosData: Record<string, Pedido> = jsonData.pedidos;
@@ -106,7 +152,7 @@ export default function RestauranteView() {
               <ListGroup.Item key={index}>
                 <HFlow justifyContent="space-between">
                   <span>{comida}</span>
-                  <Button onClick={() => handleClickDeletarItem(index)}>Deletar</Button>
+                  <Button onClick={() => handleClickDeletarItem(comida)}>Deletar</Button>
                 </HFlow>
               </ListGroup.Item>
             ))}
@@ -138,7 +184,10 @@ export default function RestauranteView() {
                       <td>{pedido.comida}</td>
                       <td>{pedido.restaurante.nome}</td>
                       <td>
-                        <OrderStatusSelect />
+                        <OrderStatusSelect status={pedido.status} setStatus={(newStatus) => {
+                          setStatus(newStatus);
+                          handleClickUpdateStatusPedido(pedidoId, newStatus);
+                        }} />
                       </td>
                     </tr>
                   );
