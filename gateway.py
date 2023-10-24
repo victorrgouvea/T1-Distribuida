@@ -28,12 +28,11 @@ def create_order():
     order[k] = v
   order['id'] = str(id_number)
   cache[str(id_number)] = order
-  print(cache)
   return make_response("Success", 200)
 
-@app.get('/get-menu/<name>')
-def get_menu(name):
-  response = requests.get(url=f"http://localhost:5001/get-menu/{name}")
+@app.get('/get-menu/<id>')
+def get_menu(id):
+  response = requests.get(url=f"http://localhost:5001/get-menu/{id}")
   if response.status_code == 200:
     return make_response(jsonify(response.json()), 200)
   else:
@@ -89,19 +88,31 @@ def get_current_order():
 
 @app.get('/get-historico-pedidos')
 def get_order_history():
-  return requests.get(url=f"http://localhost:5001/get-order-history")
+  response = requests.get(url=f"http://localhost:5001/get-order-history")
+  if response.status_code == 200:
+    return make_response(jsonify(response.json()), 200)
+  else:
+    return make_response('Internal Error', 500)
 
 @app.get('/get-restaurantes')
 def get_restaurants():
-  return requests.get(url=f"http://localhost:5001/get-restaurants")
+  response = requests.get(url=f"http://localhost:5001/get-restaurants")
+  if response.status_code == 200:
+    return make_response(jsonify(response.json()), 200)
+  else:
+    return make_response('Internal Error', 500)
 
 @app.get('/get-restaurante/<name>')
 def get_restaurant(name):
-  data = requests.get(url=f"http://localhost:5001/get-restaurants").get_json()
-  for [k, v] in data.items():
+  response = requests.get(url=f"http://localhost:5001/get-restaurants").json()
+  for [k, v] in response.items():
     if v['nome'] == name:
-      return make_response(jsonify(v[k]), 200)
-  return requests.post(url=f"http://localhost:5001/create-restaurant/<name>")
+      return make_response(jsonify(response[k]), 200)
+  response = requests.post(url=f"http://localhost:5001/create-restaurant/{name}")
+  if response.status_code == 200:
+    return make_response(jsonify(response.json()), 200)
+  else:
+    return make_response('Internal Error', 500)
 
 if __name__ == '__main__':
   app.run(port=5000, host='localhost', debug=True)
