@@ -1,7 +1,6 @@
 import { Col, Row, Table } from 'react-bootstrap';
-import { useState } from 'react';
-import StatusPedidoSelect from '../components/OrderStatusSelect';
-import jsonData from './db.json';
+import { useEffect, useState } from 'react';
+import StatusPedidoSelect from '../components/StatusPedidoSelect';
 import { PedidoFormModel } from '../model';
 import { css } from '@emotion/css';
 
@@ -13,22 +12,46 @@ interface PedidoTableProps {
 export default function PedidoTable(props: PedidoTableProps) {
   const { nome, origin } = props;
   const [status, setStatus] = useState('');
+  const [pedidosData, setPedidosData] = useState<Record<string, PedidoFormModel>>({});
 
-  const pedidosData: Record<string, PedidoFormModel> = jsonData.pedidos;
+  useEffect(() => {
+    fetchPedidos();
+  }, []);
+  
+  const fetchPedidos = () => {
+    fetch(`http://localhost:5000/get-pedidos-em-andamento`)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('Erro ao buscar pedidos.');
+        }
+        return res.json();
+      })
+      .then((pedidosData) => {
+        setPedidosData(pedidosData);
+        console.log(pedidosData)
+      })
+      .catch((err) => {
+        // setError(err.message);
+      });
+  };
+
+  const refetchPedidosOnStatusChange = () => {
+    fetchPedidos();
+  };
 
   const handleClickUpdateStatusPedido = (id: string, newStatus: string) => {
     console.log(newStatus);
     console.log(id);
 
-    fetch(`http://localhost:5000/atualizar-status-pedido/${id}`, {
+    fetch(`http://localhost:5000/atualizar-status-pedido`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ id, status: newStatus }),
+      body: JSON.stringify({ id: id, status: newStatus }),
     })
       .then((res) => {
-        if (res.status === 202) {
+        if (res.status === 200) {
           // Handle success as needed
         } else {
           alert('Um erro ocorreu ao atualizar o status do pedido.');
@@ -45,7 +68,7 @@ export default function PedidoTable(props: PedidoTableProps) {
       (origin === 'cliente' && pedido.cliente.nome === nome) ||
       (origin === 'restaurante' && pedido.restaurante.nome === nome)
     );
-  });
+  });  
 
   return (
     <Row className={styles.rowSpacing}>
@@ -75,6 +98,7 @@ export default function PedidoTable(props: PedidoTableProps) {
                           setStatus={(newStatus) => {
                             setStatus(newStatus);
                             handleClickUpdateStatusPedido(pedidoId, newStatus);
+                            refetchPedidosOnStatusChange();
                           }}
                         />
                       ) : (

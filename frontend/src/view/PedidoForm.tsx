@@ -5,8 +5,8 @@ import RestauranteSelect from '../components/RestauranteSelect';
 import { css } from '@emotion/css';
 import { PedidoFormModel, Restaurante } from '../model';
 import { convertPedidoFormModelToJson } from '../convert';
-import jsonData from './db.json'; // TODO: Retirar quando for possível resgatar os restaurantes através do backend
 import { API_BASE_URL } from '../config';
+
 
 interface PedidoFormProps {
   nomeCliente?: string;
@@ -18,9 +18,24 @@ export default function PedidoForm(props: PedidoFormProps) {
   const [restaurantes, setRestaurantes] = useState<Record<string, { nome: string; comidas: string[]; }>>({});
 
   useEffect(() => {
-    const restaurantData = jsonData.restaurantes;
-    setRestaurantes(restaurantData);
+    fetchRestaurantes();
   }, []);
+
+  const fetchRestaurantes = () => {
+    fetch(`http://localhost:5000/get-restaurantes`)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('Erro ao buscar restaurantes.');
+        }
+        return res.json();
+      })
+      .then((restaurantData) => {
+        setRestaurantes(restaurantData);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
 
   // atualiza restaurante do formdata quando restaurante é atualizado
   useEffect(() => {
@@ -80,23 +95,32 @@ export default function PedidoForm(props: PedidoFormProps) {
   const handleSubmit = () => {
     const requestData = convertPedidoFormModelToJson(formData);
   
-    fetch(`${API_BASE_URL}/realizar-pedido`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: requestData,
-    })
-      .then((response) => {
-        if (response.ok) {
-          console.log('Pedido enviado com sucesso!');
-        } else {
-          console.error('Erro ao enviar o pedido.');
-        }
+    const sendRequest = () => {
+      fetch(`${API_BASE_URL}/realizar-pedido`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: requestData,
       })
-      .catch((error) => {
-        console.error('Erro ao enviar o pedido:', error);
-      });
+        .then((response) => {
+          if (response.ok) {
+            console.log('Pedido enviado com sucesso!');
+          } else if (response.status === 500) {
+            return response.json().then((data) => {
+              console.log('Server returned a 500 error. Retrying in ' + data.retry + ' seconds...');
+              setTimeout(sendRequest, data.retry * 1000); // Retry the request after the specified delay in seconds
+            });
+          } else {
+            console.error('Erro ao enviar o pedido.');
+          }
+        })
+        .catch((error) => {
+          console.error('Erro ao enviar o pedido:', error);
+        });
+    };
+  
+    sendRequest(); // Initial request
   };
 
   return (

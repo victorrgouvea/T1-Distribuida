@@ -5,7 +5,6 @@ export const convertPedidoFormModelToJson = (
   ): string => (
     JSON.stringify({
       // TODO: remover id quando for adicionado pelo backend
-      "id": "12",
       "cliente": {
         "nome": model.cliente.nome,
         "endereco": model.cliente.endereco,
