@@ -1,6 +1,7 @@
 {
     "restaurantes": {
         "1": {
+            "id": 1,
             "nome": "restA",
             "comidas": [
                 "Pastel",
@@ -8,6 +9,7 @@
             ]
         },
         "2": {
+            "id": 2,
             "nome": "restB",
             "comidas": [
                 "Macarrao",
@@ -18,8 +20,35 @@
     },
     "pedidos": {
         "1": {
-            "comida": "pastel",
-            "restaurante": "Pastelaria do Felipe",
+            "id": 1,
+            "cliente": {
+                "nome": "Mariana",
+                "endereco": "Rua Fulano de Tal 58",
+                "telefone": "48 99999-9999"
+            },
+            "restaurante": {
+                "id": "2",
+                "nome": "restB"
+            },
+            "itensSelecionados": [
+                "Macarr\u00c3\u00a3o",
+                "Pizza"
+            ],
+            "status": "Finalizado"
+        },
+        "2": {
+            "cliente": {
+                "nome": "Felipe",
+                "endereco": "Rua Fulano de Tal 58",
+                "telefone": "48 99999-9999"
+            },
+            "restaurante": {
+                "id": "1",
+                "nome": "restA"
+            },
+            "itensSelecionados": [
+                "Pastel"
+            ],
             "status": "Finalizado"
         }
     }
