@@ -8,7 +8,6 @@ restaurant_id = 2
 
 @app.get('/get-highest-id/<key>')
 def get_highest_id(key):
-  print("chamou")
   highest_id = 0
   with open(db_path) as file_out:
     j = json.load(file_out)
@@ -101,7 +100,6 @@ def create_restaurant(name):
   else:
     restaurant_id += 1
   j = None
-  print(restaurant_id)
   with open(db_path, 'r') as file_out:
     j = json.load(file_out)
   with open(db_path, 'w') as file_out:
