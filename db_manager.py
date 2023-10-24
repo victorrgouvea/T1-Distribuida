@@ -4,6 +4,17 @@ import json
 app = Flask(__name__)
 
 db_path = 'db.json'
+restaurant_id = 3
+
+@app.get('/get-highest-id/<key>')
+def get_highest_id(key):
+  highest_id = 0
+  with open(db_path) as file_out:
+    j = json.load(file_out)
+    for [k, v] in j[key].items():
+      if int(v['id']) > highest_id:
+        highest_id = int(v['id'])
+  return make_response(jsonify({'highest_id': highest_id}), 200)
 
 @app.delete('/remove-food')
 def remove_food():
@@ -12,10 +23,10 @@ def remove_food():
   with open(db_path, 'r') as file_out:
     j = json.load(file_out)
     if data['id'] not in j['restaurantes']:
-       return make_response('Restaurant not found', 400)
+      return make_response('Restaurant not found', 400)
     if data['comida'] not in j['restaurantes'][data['id']]['comidas']:
-      return  make_response('Element not in menu', 400)
-        
+      return  make_response('Element not in menu', 401)
+
   with open(db_path, 'w') as file_out:
     j['restaurantes'][data['id']]['comidas'].remove(data['comida'])
     file_out.seek(0)
@@ -30,10 +41,10 @@ def add_food():
   with open(db_path, 'r') as file_out:
     j = json.load(file_out)
     if data['id'] not in j['restaurantes']:
-       return make_response('Restaurant not found', 400)
+      return make_response('Restaurant not found', 400)
     if data['comida'] in j['restaurantes'][data['id']]['comidas']:
-      return make_response('Element already in menu', 400)
-    
+      return make_response('Element already in menu', 401)
+
   with open(db_path, 'w') as file_out:
     j['restaurantes'][data['id']]['comidas'].append(data['comida'])
     file_out.seek(0)
@@ -54,14 +65,52 @@ def save_order():
         json.dump(j, file_out, indent=4)
   return make_response('Sucess', 200)
 
-@app.get('/get-menu/<id>')
-def get_menu(id):
+@app.get('/get-menu/<name>')
+def get_menu(name):
   data = None
+
   with open(db_path) as file_out:
         j = json.load(file_out)
-        data = j['restaurantes'][str(id)]
+        for [k, v] in j['restaurantes'].items():
+           if name == v['nome']:
+              data = j['restaurantes'][k]
+  if data != None:
+     return make_response(jsonify(data), 200)
+  else:
+     return make_response('Bad Request:Restaurant not found', 400)
+
+@app.get('/get-restaurants')
+def get_restaurants():
+  data = None
+  with open(db_path) as file_out:
+    j = json.load(file_out)
+    data = j['restaurantes']
   return make_response(jsonify(data), 200)
 
+@app.get('/get-order-history')
+def get_order_history():
+  data = None
+  with open(db_path) as file_out:
+    j = json.load(file_out)
+    data = j['pedidos']
+  return make_response(jsonify(data), 200)
+
+@app.get('/create-restaurant/<name>')
+def create_restaurant(name):
+  if restaurant_id == 3:
+    restaurant_id = get_highest_id('restaurantes').get_json['highest_id'] + 1
+  else:
+    restaurant_id += 1
+  j = None
+  with open(db_path, 'r') as file_out:
+    j = json.load(file_out)
+
+  with open(db_path, 'w') as file_out:
+    j['restaurantes'][restaurant_id] = {}
+    j['restaurantes'][restaurant_id]['name'] = name
+    file_out.seek(0)
+    json.dump(j, file_out, indent=4)
+  return make_response('Sucess', 200)
 
 if __name__ == '__main__':
   app.run(port=5001, host='localhost', debug=True)
