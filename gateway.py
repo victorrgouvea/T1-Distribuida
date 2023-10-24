@@ -3,9 +3,11 @@ import json
 import requests
 import time
 from flask_cors import CORS
+from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
 CORS(app, origins=["http://localhost:3000"])
+socketio = SocketIO(app, cors_allowed_origins=["http://localhost:3000"])
 cache = {}
 last_call = 0
 id_number = 1
@@ -28,6 +30,7 @@ def create_order():
     order[k] = v
   order['id'] = str(id_number)
   cache[str(id_number)] = order
+  socketio.emit('novo_pedido')
   return make_response("Success", 200)
 
 @app.get('/get-menu/<id>')
@@ -78,6 +81,7 @@ def update_order_status():
     if data['status'] == 'Finalizado':
       requests.post(url=f"http://localhost:5001/save-order", json=cache[data['id']])
       del cache[data['id']]
+    socketio.emit('status_atualizado')
     return make_response("Success", 200)
   else:
     return make_response('Bad request: Order not found', 400)
@@ -115,4 +119,4 @@ def get_restaurant(name):
     return make_response('Internal Error', 500)
 
 if __name__ == '__main__':
-  app.run(port=5000, host='localhost', debug=True)
+  socketio.run(app, port=5000, host='localhost', debug=True)
