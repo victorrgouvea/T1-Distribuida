@@ -2,8 +2,8 @@ import React from 'react';
 import Form from 'react-bootstrap/Form';
 
 interface RestauranteSelectProps {
-  restaurantes: Record<string, { nome: string; comidas: string[]; }>;
-  onSelect: (restaurante: { id: string; nome: string; comidas: string[]; } | null) => void;
+  restaurantes: Record<string, { nome: string; comidas: string[] }>;
+  onSelect: (restaurante: { id: string; nome: string; comidas: string[] } | null) => void;
 }
 
 const RestauranteSelect: React.FC<RestauranteSelectProps> = ({ restaurantes, onSelect }) => {

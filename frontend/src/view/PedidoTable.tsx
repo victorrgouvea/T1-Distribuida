@@ -1,9 +1,9 @@
-import { Col, Row, Table } from 'react-bootstrap';
-import { useEffect, useState } from 'react';
-import StatusPedidoSelect from '../components/StatusPedidoSelect';
-import { PedidoFormModel } from '../model';
-import { css } from '@emotion/css';
+import React, { useCallback, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
+import { Col, Row, Table } from 'react-bootstrap';
+import { css } from '@emotion/css';
+import { PedidoFormModel } from '../model';
+import StatusPedidoSelect from '../components/StatusPedidoSelect';
 
 const socket = io('http://localhost:5000');
 
@@ -15,28 +15,11 @@ interface PedidoTableProps {
 
 export default function PedidoTable(props: PedidoTableProps) {
   const { nome, origin, type } = props;
-  const [status, setStatus] = useState('');
   const [pedidosData, setPedidosData] = useState<Record<string, PedidoFormModel>>({});
-  const API_URL = type === 'andamento' ? 'get-pedidos-em-andamento' : 'get-historico-pedidos'
-
-useEffect(() => {
-  const handlePedidoEvent = () => {
-    fetchPedidos();
-    console.log('cheguei aqui');
-  };
-
-  socket.on('novo_pedido', handlePedidoEvent);
-  socket.on('status_atualizado', handlePedidoEvent);
-
-  // Clean up the event listeners when the component unmounts
-  return () => {
-    socket.off('novo_pedido', handlePedidoEvent);
-    socket.off('status_atualizado', handlePedidoEvent);
-  };
-}, []); // Make sure to pass an empty dependency array to useEffect
-
   
-  const fetchPedidos = () => {
+  const API_URL = type === 'andamento' ? 'get-pedidos-em-andamento' : 'get-historico-pedidos';
+
+  const fetchPedidos = useCallback(() => {
     fetch(`http://localhost:5000/${API_URL}`)
       .then((res) => {
         if (!res.ok) {
@@ -46,21 +29,37 @@ useEffect(() => {
       })
       .then((pedidosData) => {
         setPedidosData(pedidosData);
-        console.log(pedidosData)
+        console.log(pedidosData);
       })
       .catch((err) => {
-        // setError(err.message);
+        console.log(err);
       });
-  };
+  }, [API_URL]);
+
+  useEffect(() => {
+    const handlePedidoEvent = () => {
+      fetchPedidos();
+      console.log('cheguei aqui');
+    };
+
+    socket.on('novo_pedido', handlePedidoEvent);
+    socket.on('status_atualizado', handlePedidoEvent);
+
+    return () => {
+      socket.off('novo_pedido', handlePedidoEvent);
+      socket.off('status_atualizado', handlePedidoEvent);
+    };
+  }, [fetchPedidos]);
+
+  useEffect(() => {
+    fetchPedidos();
+  }, [fetchPedidos]);
 
   const refetchPedidosOnStatusChange = () => {
     fetchPedidos();
   };
-
+  
   const handleClickUpdateStatusPedido = (id: string, newStatus: string) => {
-    console.log(newStatus);
-    console.log(id);
-
     fetch(`http://localhost:5000/atualizar-status-pedido`, {
       method: 'PUT',
       headers: {
@@ -70,7 +69,7 @@ useEffect(() => {
     })
       .then((res) => {
         if (res.status === 200) {
-          // Handle success as needed
+          console.log('Status atualizado')
         } else {
           alert('Um erro ocorreu ao atualizar o status do pedido.');
         }
@@ -86,7 +85,7 @@ useEffect(() => {
       (origin === 'cliente' && pedido.cliente.nome === nome) ||
       (origin === 'restaurante' && pedido.restaurante.nome === nome)
     );
-  });  
+  });
 
   return (
     <Row className={styles.rowSpacing}>
@@ -114,7 +113,6 @@ useEffect(() => {
                         <StatusPedidoSelect
                           status={pedido.status}
                           setStatus={(newStatus) => {
-                            setStatus(newStatus);
                             handleClickUpdateStatusPedido(pedidoId, newStatus);
                             refetchPedidosOnStatusChange();
                           }}

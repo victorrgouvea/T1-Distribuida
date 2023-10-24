@@ -7,28 +7,30 @@ import PedidoTable from './PedidoTable';
 export default function ClienteView() {
   const { nomeCliente } = useParams<{ nomeCliente: string }>();
 
-
   return (
     <Container className={styles.container}>
       <Row>
         <h3 className={styles.heading}>Olá {nomeCliente}, faça seu pedido.</h3>
       </Row>
-      <PedidoForm nomeCliente={nomeCliente}></PedidoForm>
+
+      <PedidoForm nomeCliente={nomeCliente} />
+
       <Row>
         <Col>
           <h4>Acompanhe seus pedidos</h4>
-          <PedidoTable nome={nomeCliente} origin='cliente' type='andamento'></PedidoTable>
+          <PedidoTable nome={nomeCliente} origin="cliente" type="andamento" />
         </Col>
       </Row>
+
       <Row className={styles.rowSpacing}>
         <Col>
           <h4>Histórico de pedidos</h4>
-          <PedidoTable nome={nomeCliente} origin='cliente' type='historico'></PedidoTable>
+          <PedidoTable nome={nomeCliente} origin="cliente" type="historico" />
         </Col>
       </Row>
     </Container>
   );
-};
+}
 
 const styles = {
   heading: css`

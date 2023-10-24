@@ -7,6 +7,7 @@ import { HFlow } from 'bold-ui';
 export default function MainView() {
   const navigate = useNavigate();
   const [nome, setNome] = useState('');
+  const [error, setError] = useState('');
 
   const handleLogin = (role: string) => {
     if (nome.trim() !== '') {
@@ -15,8 +16,6 @@ export default function MainView() {
       setError('Insira o nome para acessar o sistema.');
     }
   };
-
-  const [error, setError] = useState('');
 
   return (
     <Container className={styles.container}>

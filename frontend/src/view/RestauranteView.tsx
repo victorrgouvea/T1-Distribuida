@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Button, Col, Container, Form, ListGroup, Row } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 import { css } from '@emotion/css';
@@ -28,7 +28,7 @@ export default function RestauranteView() {
       });
   };
 
-  const fetchRestaurante = () => {
+  const fetchRestaurante = useCallback(() => {
     fetch(`http://localhost:5000/get-restaurante/${nomeRestaurante}`)
       .then((res) => {
         if (!res.ok) {
@@ -39,17 +39,16 @@ export default function RestauranteView() {
       .then((restauranteData) => {
         const { id, nome } = restauranteData;
         setRestauranteData({ id, nome });
-        console.log(restauranteData)
         fetchMenuData(restauranteData.id);
       })
       .catch((err) => {
         setError(err.message);
       });
-  };
+  }, [nomeRestaurante]);
 
   useEffect(() => {
     fetchRestaurante();
-  }, []);
+  }, [fetchRestaurante]);
 
   const handleClickDeletarItem = (item: string) => {
     fetch("http://localhost:5000/remover-comida", {
@@ -57,7 +56,7 @@ export default function RestauranteView() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ "id": restauranteData.id, "comida": item }),
+      body: JSON.stringify({ id: restauranteData.id, comida: item }),
     })
       .then((res) => {
         if (res.status === 200) {
@@ -79,13 +78,13 @@ export default function RestauranteView() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ "id": restauranteData.id, "comida": novoItem }),
+      body: JSON.stringify({ id: restauranteData.id, comida: novoItem }),
     })
       .then((res) => {
         if (res.status === 200) {
           fetchMenuData(restauranteData.id);
         } else {
-          alert('Um erro ocorreu ao deletar este item.');
+          alert('Um erro ocorreu ao adicionar este item.');
         }
       })
       .catch((error) => {
@@ -98,13 +97,16 @@ export default function RestauranteView() {
       <Row>
         <h3 className={styles.heading}>Restaurante {nomeRestaurante}</h3>
       </Row>
-      {error !== '' && (
-        <Row>
-          <Col>
-            <div className="alert alert-danger">{error}</div>
-          </Col>
-        </Row>
-      )}
+      {
+        error !== '' && (
+          <Row>
+            <Col>
+              <div className="alert alert-danger">{error}</div>
+            </Col>
+          </Row>
+        )
+      }
+
       <Row className={styles.rowSpacing}>
         <Col>
           <h4>Cardápio</h4>
@@ -130,23 +132,24 @@ export default function RestauranteView() {
         </Col>
       </Row>
       <Row className={styles.rowCardapio}>
-      <Col>
-        <ListGroup>
-          {data.comidas.length === 0 ? (
-            <ListGroup.Item>Não há itens</ListGroup.Item>
-          ) : (
-            data.comidas.map((comida, index) => (
-              <ListGroup.Item key={index}>
-                <HFlow justifyContent="space-between">
-                  <span>{comida}</span>
-                  <Button onClick={() => handleClickDeletarItem(comida)}>Deletar</Button>
-                </HFlow>
-              </ListGroup.Item>
-            ))
-          )}
-        </ListGroup>
-      </Col>
-    </Row>
+        <Col>
+          <ListGroup>
+            {data.comidas.length === 0 ? (
+              <ListGroup.Item>Não há itens</ListGroup.Item>
+            ) : (
+              data.comidas.map((comida, index) => (
+                <ListGroup.Item key={index}>
+                  <HFlow justifyContent="space-between">
+                    <span>{comida}</span>
+                    <Button onClick={() => handleClickDeletarItem(comida)}>Deletar</Button>
+                  </HFlow>
+                </ListGroup.Item>
+              ))
+            )}
+          </ListGroup>
+        </Col>
+      </Row>
+
       <Row className={styles.rowSpacing}>
         <Col>
           <h4>Pedidos em Andamento</h4>
