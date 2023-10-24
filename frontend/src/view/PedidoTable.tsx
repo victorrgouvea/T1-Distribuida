@@ -1,6 +1,6 @@
 import { Col, Row, Table } from 'react-bootstrap';
 import { useState } from 'react';
-import OrderStatusSelect from '../components/OrderStatusSelect';
+import StatusPedidoSelect from '../components/OrderStatusSelect';
 import jsonData from './db.json';
 import { PedidoFormModel } from '../model';
 import { css } from '@emotion/css';
@@ -70,7 +70,7 @@ export default function PedidoTable(props: PedidoTableProps) {
                     <td>{pedido.cliente.nome}</td>
                     <td>
                       {origin === 'restaurante' ? (
-                        <OrderStatusSelect
+                        <StatusPedidoSelect
                           status={status}
                           setStatus={(newStatus) => {
                             setStatus(newStatus);
