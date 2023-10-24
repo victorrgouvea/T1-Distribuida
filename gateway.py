@@ -2,10 +2,10 @@ from flask import Flask, request, make_response, jsonify
 import json
 import requests
 import time
-#from flask_cors import CORS
+from flask_cors import CORS
 
 app = Flask(__name__)
-#CORS(app, origins=["http://localhost:3000"])
+CORS(app, origins=["http://localhost:3000"])
 cache = {}
 last_call = 0
 id_number = 1
