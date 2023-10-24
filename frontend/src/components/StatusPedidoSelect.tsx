@@ -1,12 +1,12 @@
 import React from 'react';
 import Form from 'react-bootstrap/Form';
 
-interface OrderStatusSelectProps {
+interface StatusPedidoSelectProps {
   status: string;
   setStatus: (status: string) => void;
 }
 
-function OrderStatusSelect({ status, setStatus }: OrderStatusSelectProps) {
+function StatusPedidoSelect({ status, setStatus }: StatusPedidoSelectProps) {
   const handleStatusChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedStatus = event.target.value;
     setStatus(selectedStatus);
@@ -21,4 +21,4 @@ function OrderStatusSelect({ status, setStatus }: OrderStatusSelectProps) {
   );
 }
 
-export default OrderStatusSelect;
+export default StatusPedidoSelect;

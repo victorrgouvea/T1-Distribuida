@@ -3,6 +3,7 @@ export interface PedidoFormModel {
     restaurante: Restaurante;
     itensSelecionados: string[];
     status: string;
+    id?: string;
   }
   
   export interface Restaurante {

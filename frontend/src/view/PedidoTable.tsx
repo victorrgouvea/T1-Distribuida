@@ -1,35 +1,75 @@
+import React, { useCallback, useEffect, useState } from 'react';
+import { io } from 'socket.io-client';
 import { Col, Row, Table } from 'react-bootstrap';
-import { useState } from 'react';
-import OrderStatusSelect from '../components/OrderStatusSelect';
-import jsonData from './db.json';
-import { PedidoFormModel } from '../model';
 import { css } from '@emotion/css';
+import { PedidoFormModel } from '../model';
+import StatusPedidoSelect from '../components/StatusPedidoSelect';
+
+const socket = io('http://localhost:5000');
 
 interface PedidoTableProps {
   nome?: string;
-  origin: 'cliente' | 'restaurante'; // Use string literals to represent origin
+  origin: 'cliente' | 'restaurante';
+  type: 'andamento' | 'historico';
 }
 
 export default function PedidoTable(props: PedidoTableProps) {
-  const { nome, origin } = props;
-  const [status, setStatus] = useState('');
+  const { nome, origin, type } = props;
+  const [pedidosData, setPedidosData] = useState<Record<string, PedidoFormModel>>({});
+  
+  const API_URL = type === 'andamento' ? 'get-pedidos-em-andamento' : 'get-historico-pedidos';
 
-  const pedidosData: Record<string, PedidoFormModel> = jsonData.pedidos;
+  const fetchPedidos = useCallback(() => {
+    fetch(`http://localhost:5000/${API_URL}`)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('Erro ao buscar pedidos.');
+        }
+        return res.json();
+      })
+      .then((pedidosData) => {
+        setPedidosData(pedidosData);
+        console.log(pedidosData);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, [API_URL]);
 
+  useEffect(() => {
+    const handlePedidoEvent = () => {
+      fetchPedidos();
+      console.log('cheguei aqui');
+    };
+
+    socket.on('novo_pedido', handlePedidoEvent);
+    socket.on('status_atualizado', handlePedidoEvent);
+
+    return () => {
+      socket.off('novo_pedido', handlePedidoEvent);
+      socket.off('status_atualizado', handlePedidoEvent);
+    };
+  }, [fetchPedidos]);
+
+  useEffect(() => {
+    fetchPedidos();
+  }, [fetchPedidos]);
+
+  const refetchPedidosOnStatusChange = () => {
+    fetchPedidos();
+  };
+  
   const handleClickUpdateStatusPedido = (id: string, newStatus: string) => {
-    console.log(newStatus);
-    console.log(id);
-
-    fetch(`http://localhost:5000/atualizar-status-pedido/${id}`, {
+    fetch(`http://localhost:5000/atualizar-status-pedido`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ id, status: newStatus }),
+      body: JSON.stringify({ id: id, status: newStatus }),
     })
       .then((res) => {
-        if (res.status === 202) {
-          // Handle success as needed
+        if (res.status === 200) {
+          console.log('Status atualizado')
         } else {
           alert('Um erro ocorreu ao atualizar o status do pedido.');
         }
@@ -70,11 +110,11 @@ export default function PedidoTable(props: PedidoTableProps) {
                     <td>{pedido.cliente.nome}</td>
                     <td>
                       {origin === 'restaurante' ? (
-                        <OrderStatusSelect
-                          status={status}
+                        <StatusPedidoSelect
+                          status={pedido.status}
                           setStatus={(newStatus) => {
-                            setStatus(newStatus);
                             handleClickUpdateStatusPedido(pedidoId, newStatus);
+                            refetchPedidosOnStatusChange();
                           }}
                         />
                       ) : (

@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Button, Col, Container, Form, ListGroup, Row } from 'react-bootstrap';
 import { Checkbox, HFlow } from 'bold-ui';
 import RestauranteSelect from '../components/RestauranteSelect';
-import { css } from '@emotion/css';
-import { PedidoFormModel, Restaurante } from '../model';
 import { convertPedidoFormModelToJson } from '../convert';
-import jsonData from './db.json'; // TODO: Retirar quando for possível resgatar os restaurantes através do backend
 import { API_BASE_URL } from '../config';
+import { PedidoFormModel, Restaurante } from '../model';
+
+import { css } from '@emotion/css';
 
 interface PedidoFormProps {
   nomeCliente?: string;
@@ -14,15 +14,14 @@ interface PedidoFormProps {
 
 export default function PedidoForm(props: PedidoFormProps) {
   const { nomeCliente } = props;
+
   const [restaurante, setRestaurante] = useState<Restaurante | null>(null);
   const [restaurantes, setRestaurantes] = useState<Record<string, { nome: string; comidas: string[]; }>>({});
 
   useEffect(() => {
-    const restaurantData = jsonData.restaurantes;
-    setRestaurantes(restaurantData);
+    fetchRestaurantes();
   }, []);
 
-  // atualiza restaurante do formdata quando restaurante é atualizado
   useEffect(() => {
     setFormData((prevData) => ({
       ...prevData,
@@ -32,6 +31,22 @@ export default function PedidoForm(props: PedidoFormProps) {
       },
     }));
   }, [restaurante]);
+
+  const fetchRestaurantes = () => {
+    fetch(`http://localhost:5000/get-restaurantes`)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('Erro ao buscar restaurantes.');
+        }
+        return res.json();
+      })
+      .then((restaurantData) => {
+        setRestaurantes(restaurantData);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
 
   const [formData, setFormData] = useState<PedidoFormModel>({
     cliente: {
@@ -50,9 +65,9 @@ export default function PedidoForm(props: PedidoFormProps) {
   const handleCheckboxChange = (comida: string) => {
     setFormData((prevData) => {
       const updatedSelectedItems = [...prevData.itensSelecionados];
-      
+
       const isComidaSelected = updatedSelectedItems.includes(comida);
-  
+
       if (isComidaSelected) {
         const index = updatedSelectedItems.indexOf(comida);
         if (index !== -1) {
@@ -61,7 +76,7 @@ export default function PedidoForm(props: PedidoFormProps) {
       } else {
         updatedSelectedItems.push(comida);
       }
-  
+
       return { ...prevData, itensSelecionados: updatedSelectedItems };
     });
   };
@@ -79,24 +94,33 @@ export default function PedidoForm(props: PedidoFormProps) {
 
   const handleSubmit = () => {
     const requestData = convertPedidoFormModelToJson(formData);
-  
-    fetch(`${API_BASE_URL}/realizar-pedido`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: requestData,
-    })
-      .then((response) => {
-        if (response.ok) {
-          console.log('Pedido enviado com sucesso!');
-        } else {
-          console.error('Erro ao enviar o pedido.');
-        }
+
+    const sendRequest = () => {
+      fetch(`${API_BASE_URL}/realizar-pedido`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: requestData,
       })
-      .catch((error) => {
-        console.error('Erro ao enviar o pedido:', error);
-      });
+        .then((response) => {
+          if (response.ok) {
+            console.log('Pedido enviado com sucesso!');
+          } else if (response.status === 500) {
+            return response.json().then((data) => {
+              console.log('Server returned a 500 error. Retrying in ' + data.retry + ' seconds...');
+              setTimeout(sendRequest, data.retry * 1000); // Retry the request after the specified delay in seconds
+            });
+          } else {
+            console.error('Erro ao enviar o pedido.');
+          }
+        })
+        .catch((error) => {
+          console.error('Erro ao enviar o pedido:', error);
+        });
+    };
+
+    sendRequest();
   };
 
   return (
@@ -116,20 +140,20 @@ export default function PedidoForm(props: PedidoFormProps) {
       </Row>
       <Row>
         <Col>
-        {restaurante?.comidas ? (
-          <ListGroup>
-            {restaurante?.comidas.map((comida, index) => (
-              <ListGroup.Item key={index}>
-                <HFlow justifyContent="space-between">
-                  <span>{comida}</span>
-                  <Checkbox onChange={() => handleCheckboxChange(comida)} />
-                </HFlow>
-              </ListGroup.Item>
-            ))}
-          </ListGroup>
-        ) : (
-          <p>Selecione um restaurante para visualizar o cardápio.</p>
-        )}
+          {restaurante?.comidas ? (
+            <ListGroup>
+              {restaurante?.comidas.map((comida, index) => (
+                <ListGroup.Item key={index}>
+                  <HFlow justifyContent="space-between">
+                    <span>{comida}</span>
+                    <Checkbox onChange={() => handleCheckboxChange(comida)} />
+                  </HFlow>
+                </ListGroup.Item>
+              ))}
+            </ListGroup>
+          ) : (
+            <p>Selecione um restaurante para visualizar o cardápio.</p>
+          )}
         </Col>
       </Row>
       <Row className={styles.rowSpacing}>
@@ -180,4 +204,4 @@ const styles = {
     background-color: #fafafa;
     margin: 2rem;
   `,
-}
+};
