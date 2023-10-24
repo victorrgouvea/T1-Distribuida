@@ -3,23 +3,41 @@ import { useEffect, useState } from 'react';
 import StatusPedidoSelect from '../components/StatusPedidoSelect';
 import { PedidoFormModel } from '../model';
 import { css } from '@emotion/css';
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:5000');
 
 interface PedidoTableProps {
   nome?: string;
-  origin: 'cliente' | 'restaurante'; // Use string literals to represent origin
+  origin: 'cliente' | 'restaurante';
+  type: 'andamento' | 'historico';
 }
 
 export default function PedidoTable(props: PedidoTableProps) {
-  const { nome, origin } = props;
+  const { nome, origin, type } = props;
   const [status, setStatus] = useState('');
   const [pedidosData, setPedidosData] = useState<Record<string, PedidoFormModel>>({});
+  const API_URL = type === 'andamento' ? 'get-pedidos-em-andamento' : 'get-historico-pedidos'
 
-  useEffect(() => {
+useEffect(() => {
+  const handlePedidoEvent = () => {
     fetchPedidos();
-  }, []);
+    console.log('cheguei aqui');
+  };
+
+  socket.on('novo_pedido', handlePedidoEvent);
+  socket.on('status_atualizado', handlePedidoEvent);
+
+  // Clean up the event listeners when the component unmounts
+  return () => {
+    socket.off('novo_pedido', handlePedidoEvent);
+    socket.off('status_atualizado', handlePedidoEvent);
+  };
+}, []); // Make sure to pass an empty dependency array to useEffect
+
   
   const fetchPedidos = () => {
-    fetch(`http://localhost:5000/get-pedidos-em-andamento`)
+    fetch(`http://localhost:5000/${API_URL}`)
       .then((res) => {
         if (!res.ok) {
           throw new Error('Erro ao buscar pedidos.');
@@ -94,7 +112,7 @@ export default function PedidoTable(props: PedidoTableProps) {
                     <td>
                       {origin === 'restaurante' ? (
                         <StatusPedidoSelect
-                          status={status}
+                          status={pedido.status}
                           setStatus={(newStatus) => {
                             setStatus(newStatus);
                             handleClickUpdateStatusPedido(pedidoId, newStatus);

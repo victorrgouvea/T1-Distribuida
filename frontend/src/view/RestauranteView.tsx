@@ -57,7 +57,7 @@ export default function RestauranteView() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ "id": restauranteData.id, "comida": novoItem }),
+      body: JSON.stringify({ "id": restauranteData.id, "comida": item }),
     })
       .then((res) => {
         if (res.status === 200) {
@@ -149,8 +149,14 @@ export default function RestauranteView() {
     </Row>
       <Row className={styles.rowSpacing}>
         <Col>
-          <h4>Pedidos</h4>
-          <PedidoTable nome={nomeRestaurante} origin='restaurante'></PedidoTable>
+          <h4>Pedidos em Andamento</h4>
+          <PedidoTable nome={nomeRestaurante} origin='restaurante' type='andamento'></PedidoTable>
+        </Col>
+      </Row>
+      <Row className={styles.rowSpacing}>
+        <Col>
+          <h4>Histórico de pedidos</h4>
+          <PedidoTable nome={nomeRestaurante} origin='restaurante' type='historico'></PedidoTable>
         </Col>
       </Row>
     </Container>

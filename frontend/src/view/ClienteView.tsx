@@ -14,10 +14,16 @@ export default function ClienteView() {
         <h3 className={styles.heading}>Olá {nomeCliente}, faça seu pedido.</h3>
       </Row>
       <PedidoForm nomeCliente={nomeCliente}></PedidoForm>
+      <Row>
+        <Col>
+          <h4>Acompanhe seus pedidos</h4>
+          <PedidoTable nome={nomeCliente} origin='cliente' type='andamento'></PedidoTable>
+        </Col>
+      </Row>
       <Row className={styles.rowSpacing}>
         <Col>
-          <h5>Acompanhe seu pedido</h5>
-          <PedidoTable nome={nomeCliente} origin='cliente'></PedidoTable>
+          <h4>Histórico de pedidos</h4>
+          <PedidoTable nome={nomeCliente} origin='cliente' type='historico'></PedidoTable>
         </Col>
       </Row>
     </Container>
