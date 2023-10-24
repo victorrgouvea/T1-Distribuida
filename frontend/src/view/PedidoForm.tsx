@@ -132,7 +132,7 @@ export default function PedidoForm(props: PedidoFormProps) {
           <RestauranteSelect restaurantes={restaurantes} onSelect={setRestaurante} />
         </Col>
       </Row>
-
+  
       <Row className={styles.rowSpacing}>
         <Col>
           <h6>Selecione os itens</h6>
@@ -140,17 +140,21 @@ export default function PedidoForm(props: PedidoFormProps) {
       </Row>
       <Row>
         <Col>
-          {restaurante?.comidas ? (
-            <ListGroup>
-              {restaurante?.comidas.map((comida, index) => (
-                <ListGroup.Item key={index}>
-                  <HFlow justifyContent="space-between">
-                    <span>{comida}</span>
-                    <Checkbox onChange={() => handleCheckboxChange(comida)} />
-                  </HFlow>
-                </ListGroup.Item>
-              ))}
-            </ListGroup>
+          {restaurante ? (
+            restaurante.comidas?.length ? (
+              <ListGroup>
+                {restaurante.comidas.map((comida, index) => (
+                  <ListGroup.Item key={index}>
+                    <HFlow justifyContent="space-between">
+                      <span>{comida}</span>
+                      <Checkbox onChange={() => handleCheckboxChange(comida)} />
+                    </HFlow>
+                  </ListGroup.Item>
+                ))}
+              </ListGroup>
+            ) : (
+              <p>Ainda não há itens no cardápio.</p>
+            )
           ) : (
             <p>Selecione um restaurante para visualizar o cardápio.</p>
           )}
